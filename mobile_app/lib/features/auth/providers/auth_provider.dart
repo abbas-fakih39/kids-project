@@ -102,10 +102,10 @@ class AuthProvider extends ChangeNotifier {
     }
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout) {
-      return 'Délai de connexion dépassé. Vérifiez que le serveur est lancé.';
+      return 'Délai de connexion dépassé. Vérifiez votre connexion internet.';
     }
     if (e.type == DioExceptionType.connectionError) {
-      return 'Impossible de joindre le serveur. Vérifiez que le backend est lancé sur le port 3000.';
+      return 'Impossible de joindre le serveur. Vérifiez votre connexion internet.';
     }
     return 'Une erreur est survenue. Veuillez réessayer.';
   }
