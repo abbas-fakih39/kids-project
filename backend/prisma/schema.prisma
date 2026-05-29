@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,9 +5,192 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// ENUMS
+
+enum UserRole {
+  client
+  admin
+}
+
+enum ProductStatus {
+  disponible
+  indisponible
+  maintenance
+}
+
+enum BookingStatus {
+  en_attente @map("en attente") // Mapping spaces
+  confirmee  @map("confirmée")
+  en_cours   @map("en cours")
+  terminee   @map("terminée")
+  annulee    @map("annulée")
+}
+
+enum DeliveryMethod {
+  livraison            @map("livraison")
+  retrait_en_magasin   @map("retrait en magasin")
+}
+
+enum PaymentMethod {
+  carte_bancaire @map("carte bancaire")
+  virement       @map("virement")
+  paypal         @map("PayPal")
+}
+
+enum PaymentStatus {
+  en_attente @map("en attente")
+  valide     @map("validé")
+  echoue     @map("échoué")
+  rembourse  @map("remboursé")
+}
+
+// MODELS
+
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?  // The question mark means this field is optional
-  createdAt DateTime @default(now())
+  user_id            Int       @id @default(autoincrement())
+  user_nom           String    @db.VarChar(100)
+  user_prenom        String    @db.VarChar(100)
+  user_birth         DateTime? @db.Date
+  user_email         String    @unique @db.VarChar(255)
+  user_number        String?   @db.VarChar(20)
+  user_password      String    @db.VarChar(255)
+  user_role          UserRole  @default(client)
+  user_refresh_token String?   @db.Text
+  user_created_at    DateTime  @default(now()) @db.Timestamp(3)
+  user_updated_at    DateTime? @updatedAt @db.Timestamp(3)
+
+  bookings Booking[]
+  reviews  Review[]
+  cart     Cart?
+
+  @@map("users")
+}
+
+model Product {
+  products_id               Int           @id @default(autoincrement())
+  products_name             String        @db.VarChar(255)
+  products_description      String?       @db.Text
+  products_category         String        @db.VarChar(100)
+  products_price_per_day    Decimal       @db.Decimal(10, 2)
+  products_stock            Int           @default(0)
+  products_safety_standards String?       @db.VarChar(255)
+  products_status           ProductStatus @default(disponible)
+  products_created_at       DateTime      @default(now()) @db.Date
+  products_updated_at       DateTime?     @updatedAt @db.Date
+
+  images         ProductImage[]
+  bookingProducts BookingProduct[]
+  reviews        Review[]
+  cartItems      CartItem[]
+
+  @@index([products_category, products_status])
+  @@map("products")
+}
+
+model ProductImage {
+  image_id          Int      @id @default(autoincrement())
+  image_products_id Int
+  image_url         String   @db.VarChar(500)
+  image_order       Int      @default(0)
+  image_created_at  DateTime @default(now()) @db.Timestamp(3)
+
+  product Product @relation(fields: [image_products_id], references: [products_id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+model Booking {
+  booking_id               Int            @id @default(autoincrement())
+  booking_user_id          Int
+  booking_start_date       DateTime       @db.Date
+  booking_end_date         DateTime       @db.Date
+  booking_total_amount     Decimal        @db.Decimal(10, 2)
+  booking_status           BookingStatus  @default(en_attente)
+  booking_delivery_method  DeliveryMethod
+  booking_delivery_street  String?        @db.VarChar(255)
+  booking_delivery_city    String?        @db.VarChar(100)
+  booking_delivery_zip     String?        @db.VarChar(10)
+  booking_delivery_country String?        @default("France") @db.VarChar(100)
+  booking_created_at       DateTime       @default(now()) @db.Timestamp(3)
+  booking_updated_at       DateTime?      @updatedAt @db.Timestamp(3)
+
+  user     User             @relation(fields: [booking_user_id], references: [user_id], onDelete: Restrict)
+  products BookingProduct[]
+  payment  Payment?
+  review   Review?
+
+  @@index([booking_user_id])
+  @@map("bookings")
+}
+
+model BookingProduct {
+  bp_id             Int     @id @default(autoincrement())
+  bp_booking_id     Int
+  bp_product_id     Int
+  bp_quantity       Int
+  bp_price_snapshot Decimal @db.Decimal(10, 2)
+
+  booking Booking @relation(fields: [bp_booking_id], references: [booking_id], onDelete: Cascade)
+  product Product @relation(fields: [bp_product_id], references: [products_id], onDelete: Restrict)
+
+  @@map("booking_products")
+}
+
+model Payment {
+  payments_id         Int           @id @default(autoincrement())
+  payments_booking_id Int           @unique
+  payments_amount     Decimal       @db.Decimal(10, 2)
+  payments_method     PaymentMethod
+  payments_status     PaymentStatus @default(en_attente)
+  payments_created_at DateTime      @default(now()) @db.Timestamp(3)
+  payments_updated_at DateTime?     @updatedAt @db.Timestamp(3)
+
+  booking Booking @relation(fields: [payments_booking_id], references: [booking_id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model Review {
+  review_id         Int       @id @default(autoincrement())
+  review_booking_id Int       @unique
+  review_user_id    Int
+  review_product_id Int
+  review_rating     Int       @db.SmallInt
+  review_comment    String?   @db.Text
+  review_created_at DateTime  @default(now()) @db.Timestamp(3)
+  review_updated_at DateTime? @updatedAt @db.Timestamp(3)
+
+  booking Booking @relation(fields: [review_booking_id], references: [booking_id], onDelete: Cascade)
+  user    User    @relation(fields: [review_user_id], references: [user_id], onDelete: Cascade)
+  product Product @relation(fields: [review_product_id], references: [products_id], onDelete: Cascade)
+
+  @@map("reviews")
+}
+
+model Cart {
+  carts_id         Int       @id @default(autoincrement())
+  carts_user_id    Int       @unique
+  carts_created_at DateTime  @default(now()) @db.Timestamp(3)
+  carts_updated_at DateTime? @updatedAt @db.Timestamp(3)
+
+  user  User       @relation(fields: [carts_user_id], references: [user_id], onDelete: Cascade)
+  items CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  cart_item_id             Int      @id @default(autoincrement())
+  cart_item_cart_id        Int
+  cart_item_product_id     Int
+  cart_item_quantity       Int
+  cart_item_start_date     DateTime @db.Date
+  cart_item_end_date       DateTime @db.Date
+  cart_item_price_snapshot Decimal  @db.Decimal(10, 2)
+
+  cart    Cart    @relation(fields: [cart_item_cart_id], references: [carts_id], onDelete: Cascade)
+  product Product @relation(fields: [cart_item_product_id], references: [products_id], onDelete: Cascade)
+
+  @@map("cart_items")
 }

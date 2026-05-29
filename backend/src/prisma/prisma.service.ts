@@ -1,10 +1,20 @@
+import 'dotenv/config';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
+import { Pool } from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
+    constructor() {
+        if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL must be set');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+        const adapter = new PrismaPg(pool as any);
+        super({ adapter });
+    }
+
     async onModuleInit() {
-        // This connects to the database when your NestJS app starts
         await this.$connect();
     }
 }
