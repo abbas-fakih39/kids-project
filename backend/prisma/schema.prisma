@@ -56,9 +56,13 @@ model User {
   user_number        String?   @db.VarChar(20)
   user_password      String    @db.VarChar(255)
   user_role          UserRole  @default(client)
-  user_refresh_token String?   @db.Text
-  user_created_at    DateTime  @default(now()) @db.Timestamp(3)
-  user_updated_at    DateTime? @updatedAt @db.Timestamp(3)
+  user_refresh_token       String?  @db.Text
+  user_notif_push          Boolean  @default(false)
+  user_notif_promo         Boolean  @default(false)
+  user_notif_transactional Boolean  @default(true)
+  user_push_token          String?  @db.Text
+  user_created_at          DateTime @default(now()) @db.Timestamp(3)
+  user_updated_at          DateTime? @updatedAt @db.Timestamp(3)
 
   bookings Booking[]
   reviews  Review[]
@@ -138,13 +142,14 @@ model BookingProduct {
 }
 
 model Payment {
-  payments_id         Int           @id @default(autoincrement())
-  payments_booking_id Int           @unique
-  payments_amount     Decimal       @db.Decimal(10, 2)
-  payments_method     PaymentMethod
-  payments_status     PaymentStatus @default(en_attente)
-  payments_created_at DateTime      @default(now()) @db.Timestamp(3)
-  payments_updated_at DateTime?     @updatedAt @db.Timestamp(3)
+  payments_id               Int           @id @default(autoincrement())
+  payments_booking_id       Int           @unique
+  payments_amount           Decimal       @db.Decimal(10, 2)
+  payments_method           PaymentMethod
+  payments_status           PaymentStatus @default(en_attente)
+  payments_stripe_intent_id String?       @db.VarChar(255)
+  payments_created_at       DateTime      @default(now()) @db.Timestamp(3)
+  payments_updated_at       DateTime?     @updatedAt @db.Timestamp(3)
 
   booking Booking @relation(fields: [payments_booking_id], references: [booking_id], onDelete: Cascade)
 
@@ -193,4 +198,18 @@ model CartItem {
   product Product @relation(fields: [cart_item_product_id], references: [products_id], onDelete: Cascade)
 
   @@map("cart_items")
+}
+
+model SupportRequest {
+  support_id         Int      @id @default(autoincrement())
+  support_email      String   @db.VarChar(255)
+  support_prenom     String   @db.VarChar(100)
+  support_nom        String   @db.VarChar(100)
+  support_subject    String?  @db.VarChar(255)
+  support_message    String   @db.Text
+  support_order_ref  String?  @db.VarChar(50)
+  support_status     String   @default("open") @db.VarChar(20)
+  support_created_at DateTime @default(now()) @db.Timestamp(3)
+
+  @@map("support_requests")
 }

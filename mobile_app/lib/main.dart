@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'core/theme/app_theme.dart';
 import 'core/navigation/app_navigator.dart';
 import 'features/auth/providers/auth_provider.dart';
@@ -12,6 +13,11 @@ import 'features/main/main_shell.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  // TODO: replace with your live key for production
+  Stripe.publishableKey = const String.fromEnvironment(
+    'STRIPE_PUBLISHABLE_KEY',
+    defaultValue: 'pk_test_placeholder',
+  );
   runApp(
     MultiProvider(
       providers: [

@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, UseGuards, ParseIntPipe, Headers, Req } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { UpdatePaymentStatusDto } from './dto/update-payment-status.dto';
-import { WebhookPaymentDto } from './dto/webhook-payment.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -15,14 +14,22 @@ export class PaymentsController {
   @Post('webhook')
   handleWebhook(
     @Req() req: any,
-    @Body() webhookDto: WebhookPaymentDto,
-    @Headers('x-webhook-signature') signature: string | undefined,
+    @Headers('stripe-signature') signature: string | undefined,
   ) {
     const rawBody: Buffer = (req.rawBody as Buffer) ?? Buffer.alloc(0);
-    return this.paymentsService.handleWebhook(rawBody, webhookDto, signature);
+    return this.paymentsService.handleWebhook(rawBody, signature);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard)
+  @Post('initiate/:bookingId')
+  initiatePayment(
+    @Param('bookingId', ParseIntPipe) bookingId: number,
+    @CurrentUser() user: any,
+  ) {
+    return this.paymentsService.initiatePayment(bookingId, user.sub, user.role);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('booking/:bookingId')
   findByBooking(@Param('bookingId', ParseIntPipe) bookingId: number, @CurrentUser() user: any) {
     return this.paymentsService.findByBooking(bookingId, user.sub, user.role);

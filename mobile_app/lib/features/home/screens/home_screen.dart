@@ -155,23 +155,10 @@ class HomeScreen extends StatelessWidget {
             // Logo row
             Row(
               children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: _navy,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'K.',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 19,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
+                Image.asset(
+                  'assets/images/logo.png',
+                  width: 44,
+                  height: 44,
                 ),
                 const SizedBox(width: 10),
                 const Column(
@@ -228,7 +215,7 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        "Qu'avez-vous besoin d'équipements ?",
+                        "Rechercher un équipement…",
                         style: const TextStyle(
                           color: _textGrey,
                           fontSize: 14,
@@ -478,7 +465,7 @@ class HomeScreen extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         SizedBox(
-          height: 200,
+          height: 220,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.none,

@@ -40,7 +40,7 @@ class _SearchScreenState extends State<SearchScreen> {
     {'label': 'Repas',       'value': 'Repas',        'icon': Icons.chair_alt_rounded},
     {'label': 'Poussettes',  'value': 'Poussettes',   'icon': Icons.child_care_rounded},
     {'label': 'Lits',        'value': 'Lits',         'icon': Icons.bed_rounded},
-    {'label': 'Sièges auto', 'value': 'Sièges auto',  'icon': Icons.car_crash_rounded},
+    {'label': 'Sièges auto', 'value': 'Sièges auto',  'icon': Icons.event_seat_rounded},
     {'label': 'Jouets',      'value': 'Jouets',       'icon': Icons.toys_rounded},
   ];
 
@@ -104,14 +104,16 @@ class _SearchScreenState extends State<SearchScreen> {
               : '';
           final price = _parseDecimal(p['products_price_per_day']);
           return {
-            'id':          p['products_id'],
-            'name':        p['products_name'] as String? ?? '',
-            'price':       '${price.toStringAsFixed(price == price.truncate() ? 0 : 2)}€',
-            'price_num':   price,
-            'image':       imageUrl,
-            'category':    p['products_category'] as String? ?? '',
-            'stock':       p['products_stock'] ?? 0,
-            'description': p['products_description'] as String? ?? '',
+            'id':           p['products_id'],
+            'name':         p['products_name'] as String? ?? '',
+            'price':        '${price.toStringAsFixed(price == price.truncate() ? 0 : 2)}€',
+            'price_num':    price,
+            'image':        imageUrl,
+            'category':     p['products_category'] as String? ?? '',
+            'stock':        p['products_stock'] ?? 0,
+            'description':  p['products_description'] as String? ?? '',
+            'avg_rating':   (p['avg_rating'] as num?)?.toDouble() ?? 0.0,
+            'review_count': p['review_count'] as int? ?? 0,
           };
         }).toList();
         _isLoading = false;
@@ -470,12 +472,25 @@ class _ProductCard extends StatelessWidget {
   final Map<String, dynamic> product;
   const _ProductCard({required this.product});
 
+  static List<Widget> _buildStarIcons(double rating) {
+    final full    = rating.floor();
+    final hasHalf = (rating - full) >= 0.3;
+    final empty   = 5 - full - (hasHalf ? 1 : 0);
+    return [
+      ...List.generate(full,  (_) => const Icon(Icons.star_rounded,      size: 11, color: _amber)),
+      if (hasHalf)                    const Icon(Icons.star_half_rounded, size: 11, color: _amber),
+      ...List.generate(empty, (_) => const Icon(Icons.star_rounded,      size: 11, color: Color(0xFFE5E7EB))),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
-    final name     = product['name'] as String;
-    final price    = product['price'] as String;
-    final imageUrl = product['image'] as String;
-    final stock    = (product['stock'] as int?) ?? 0;
+    final name        = product['name'] as String;
+    final price       = product['price'] as String;
+    final imageUrl    = product['image'] as String;
+    final stock       = (product['stock'] as int?) ?? 0;
+    final avgRating   = (product['avg_rating']   as double?) ?? 0.0;
+    final reviewCount = (product['review_count'] as int?)    ?? 0;
 
     return GestureDetector(
       onTap: () => Navigator.push(
@@ -588,15 +603,12 @@ class _ProductCard extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Stars (placeholder 4.5 — will be dynamic when reviews API integrated)
                         Row(
                           children: [
-                            ...List.generate(4, (_) => const Icon(
-                              Icons.star_rounded, size: 11, color: _amber)),
-                            const Icon(Icons.star_half_rounded, size: 11, color: _amber),
+                            ..._buildStarIcons(avgRating),
                             const SizedBox(width: 4),
-                            const Text(
-                              '4.5',
+                            Text(
+                              reviewCount > 0 ? avgRating.toStringAsFixed(1) : 'Nouveau',
                               style: TextStyle(
                                 fontSize: 10,
                                 color: _textGrey,

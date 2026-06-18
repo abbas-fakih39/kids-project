@@ -25,8 +25,10 @@ export class ProductsController {
     @Query('q') q?: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number,
+    @Query('start_date') startDate?: string,
+    @Query('end_date') endDate?: string,
   ) {
-    return this.productsService.findAll(category, status, q, page, limit);
+    return this.productsService.findAll(category, status, q, page, limit, startDate, endDate);
   }
 
   @Get(':id')

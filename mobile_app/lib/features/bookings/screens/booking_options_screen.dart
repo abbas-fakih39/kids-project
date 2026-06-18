@@ -46,10 +46,22 @@ class _BookingOptionsScreenState extends State<BookingOptionsScreen> {
   bool _assuranceVol   = false;
   int  _selectedLocation = 1; // 0=domicile, 1=paris, 2=lyon
 
+  final _streetCtrl = TextEditingController();
+  final _cityCtrl   = TextEditingController();
+  final _zipCtrl    = TextEditingController();
+
   bool _isHygieneAccepted = false;
   bool _isAddingToCart    = false;
 
   late final double _pricePerDay;
+
+  @override
+  void dispose() {
+    _streetCtrl.dispose();
+    _cityCtrl.dispose();
+    _zipCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -79,7 +91,11 @@ class _BookingOptionsScreenState extends State<BookingOptionsScreen> {
   double get _subtotal      => _locationCost + _optionsCost + _deliveryCost + _appFee;
 
   bool get _hasDates   => _startDate != null && _endDate != null;
-  bool get _canSubmit  => _hasDates && _isHygieneAccepted;
+  bool get _needsAddress => _selectedLocation == 0;
+  bool get _addressFilled => _streetCtrl.text.trim().isNotEmpty &&
+      _cityCtrl.text.trim().isNotEmpty &&
+      _zipCtrl.text.trim().isNotEmpty;
+  bool get _canSubmit  => _hasDates && _isHygieneAccepted && (!_needsAddress || _addressFilled);
 
   String _fmtDay(DateTime dt) =>
       '${dt.day} ${_monthNamesShort[dt.month]}';
@@ -129,6 +145,9 @@ class _BookingOptionsScreenState extends State<BookingOptionsScreen> {
           deliveryMethod: _selectedLocation == 0 ? 'livraison' : 'retrait_en_magasin',
           total: _subtotal,
           deposit: 150,
+          deliveryStreet: _needsAddress ? _streetCtrl.text.trim() : null,
+          deliveryCity:   _needsAddress ? _cityCtrl.text.trim()   : null,
+          deliveryZip:    _needsAddress ? _zipCtrl.text.trim()     : null,
         ),
       ),
     );
@@ -222,6 +241,15 @@ class _BookingOptionsScreenState extends State<BookingOptionsScreen> {
                       ],
                     ),
                   ),
+                  if (_needsAddress) ...[
+                    const SizedBox(height: 28),
+                    _buildSectionTitle('Adresse de livraison', Icons.local_shipping_outlined),
+                    const SizedBox(height: 14),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: _buildAddressFields(),
+                    ),
+                  ],
                   if (_hasDates) ...[
                     const SizedBox(height: 28),
                     _buildPriceSummary(),
@@ -756,6 +784,63 @@ class _BookingOptionsScreenState extends State<BookingOptionsScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  // ── Address fields ────────────────────────────────────────
+  Widget _buildAddressFields() {
+    const inputDecoration = InputDecoration(
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        borderSide: BorderSide(color: Color(0xFFE2E8F0)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        borderSide: BorderSide(color: Color(0xFFE2E8F0)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        borderSide: BorderSide(color: _blue, width: 1.5),
+      ),
+    );
+    return Column(
+      children: [
+        TextField(
+          controller: _streetCtrl,
+          onChanged: (_) => setState(() {}),
+          decoration: inputDecoration.copyWith(hintText: 'Rue et numéro'),
+          style: const TextStyle(color: _navy, fontSize: 14),
+          textCapitalization: TextCapitalization.sentences,
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: TextField(
+                controller: _cityCtrl,
+                onChanged: (_) => setState(() {}),
+                decoration: inputDecoration.copyWith(hintText: 'Ville'),
+                style: const TextStyle(color: _navy, fontSize: 14),
+                textCapitalization: TextCapitalization.words,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                controller: _zipCtrl,
+                onChanged: (_) => setState(() {}),
+                decoration: inputDecoration.copyWith(hintText: 'Code postal'),
+                style: const TextStyle(color: _navy, fontSize: 14),
+                keyboardType: TextInputType.number,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

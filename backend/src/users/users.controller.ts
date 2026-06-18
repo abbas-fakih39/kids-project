@@ -1,7 +1,8 @@
-import { Controller, Get, Body, Patch, Param, Delete, UseGuards, ParseIntPipe, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Post, Param, Delete, UseGuards, ParseIntPipe, ForbiddenException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateNotifPrefsDto } from './dto/update-notif-prefs.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -27,6 +28,21 @@ export class UsersController {
   @Patch('profile/password')
   changePassword(@CurrentUser() user: any, @Body() changePasswordDto: ChangePasswordDto) {
     return this.usersService.changePassword(user.sub, changePasswordDto);
+  }
+
+  @Post('me/push-token')
+  savePushToken(@CurrentUser() user: any, @Body('token') token: string) {
+    return this.usersService.savePushToken(user.sub, token);
+  }
+
+  @Get('me/preferences')
+  getPreferences(@CurrentUser() user: any) {
+    return this.usersService.getPreferences(user.sub);
+  }
+
+  @Patch('me/preferences')
+  updatePreferences(@CurrentUser() user: any, @Body() dto: UpdateNotifPrefsDto) {
+    return this.usersService.updatePreferences(user.sub, dto);
   }
 
   @Get(':id')

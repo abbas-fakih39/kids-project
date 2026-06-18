@@ -94,9 +94,9 @@ class BookingConfirmationScreen extends StatelessWidget {
       ),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF3C82F5), Color(0xFF1B3A57)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF3C82F5), Color(0xFF6BAAF8)],
         ),
       ),
       child: Column(

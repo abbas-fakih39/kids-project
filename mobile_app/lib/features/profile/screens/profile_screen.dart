@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../admin/admin_dashboard_screen.dart';
 import '../../../core/network/dio_client.dart';
 import 'edit_profile_screen.dart';
 import 'notifications_screen.dart';
@@ -16,9 +17,10 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
-    final name = auth.user?['user_prenom'] as String? ?? 'Utilisateur';
-    final email = auth.user?['user_email'] as String? ?? '';
+    final auth    = context.watch<AuthProvider>();
+    final name    = auth.user?['user_prenom'] as String? ?? 'Utilisateur';
+    final email   = auth.user?['user_email'] as String? ?? '';
+    final isAdmin = auth.user?['user_role'] == 'admin';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FA),
@@ -41,6 +43,23 @@ class ProfileScreen extends StatelessWidget {
               style: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
             ),
             const SizedBox(height: 40),
+
+            // ── Admin ──
+            if (isAdmin) ...[
+              _sectionTitle('Administration'),
+              const SizedBox(height: 12),
+              _buildSection(context, [
+                _MenuItem(
+                  icon: Icons.admin_panel_settings_rounded,
+                  label: 'Espace Admin',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
+                  ),
+                ),
+              ]),
+              const SizedBox(height: 28),
+            ],
 
             // ── Compte ──
             _sectionTitle('Compte'),

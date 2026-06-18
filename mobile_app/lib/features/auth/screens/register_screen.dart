@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
-import '../../../core/widgets/app_logo.dart';
+import '../../../core/widgets/social_auth_buttons.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -67,7 +67,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 48),
 
                 // ── Logo ──
-                const AppLogo(size: 72),
+                Image.asset('assets/images/logo.png', width: 72, height: 72),
                 const SizedBox(height: 24),
 
                 // ── Title ──
@@ -218,8 +218,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       backgroundColor: const Color(0xFF1B3A57),
                       foregroundColor: Colors.white,
                       elevation: 0,
-                      shape:
-                          RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
                     child: auth.isLoading
                         ? const SizedBox(
@@ -236,7 +235,77 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                   ),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 20),
+
+                // ── Divider "ou" ──
+                const Row(
+                  children: [
+                    Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      child: Text('ou', style: TextStyle(color: Color(0xFF9CA3AF), fontSize: 13)),
+                    ),
+                    Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // ── Google button ──
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: OutlinedButton(
+                    onPressed: () {},
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      backgroundColor: Colors.white,
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const GoogleIcon(),
+                        SizedBox(width: 10),
+                        Text(
+                          'Continuer avec Google',
+                          style: TextStyle(
+                            color: Color(0xFF334155),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // ── Apple button ──
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.apple_rounded, color: Colors.white, size: 22),
+                        SizedBox(width: 8),
+                        Text(
+                          'Continuer avec Apple',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
 
                 // ── "Se connecter" link ──
                 GestureDetector(
@@ -260,10 +329,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 16),
 
                 // ── Terms ──
-                Text(
+                const Text(
                   'En continuant, vous acceptez nos Conditions d\'utilisation\net notre Politique de confidentialité',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 11, color: Colors.grey.shade500, height: 1.5),
+                  style: TextStyle(fontSize: 11, color: Color(0xFF6B7280), height: 1.5),
                 ),
                 const SizedBox(height: 28),
               ],

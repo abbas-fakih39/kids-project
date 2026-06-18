@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import '../../../core/network/dio_client.dart';
+import 'booking_detail_screen.dart';
 
 const _navy      = Color(0xFF1B3A57);
 const _blue      = Color(0xFF3C82F5);
@@ -302,7 +303,14 @@ class _BookingCard extends StatelessWidget {
     final style = _statusStyle;
     final nb    = _nbDays;
 
-    return Container(
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => BookingDetailScreen(booking: booking),
+        ),
+      ),
+      child: Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -419,6 +427,7 @@ class _BookingCard extends StatelessWidget {
           ],
         ],
       ),
+    ),
     );
   }
 

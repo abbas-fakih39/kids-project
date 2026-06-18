@@ -33,7 +33,7 @@ class _MainShellState extends State<MainShell> {
       child: Scaffold(
         backgroundColor: const Color(0xFFF4F7FA),
         body: IndexedStack(index: _currentIndex, children: _pages),
-        bottomNavigationBar: _SimpleNavBar(
+        bottomNavigationBar: _FloatingPillNavBar(
           currentIndex: _currentIndex,
           onTap: _onTabTap,
         ),
@@ -42,13 +42,13 @@ class _MainShellState extends State<MainShell> {
   }
 }
 
-// ── Navy bottom navigation bar (matches Figma maquette) ──────────────────────
+// ── Navy bottom navigation bar with floating pill active indicator ─────────────
 
-class _SimpleNavBar extends StatelessWidget {
+class _FloatingPillNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
-  const _SimpleNavBar({required this.currentIndex, required this.onTap});
+  const _FloatingPillNavBar({required this.currentIndex, required this.onTap});
 
   static const _items = [
     _NavItem(icon: Icons.home_outlined,          iconSelected: Icons.home_rounded,          label: 'Accueil'),
@@ -59,70 +59,159 @@ class _SimpleNavBar extends StatelessWidget {
   ];
 
   static const _navy = Color(0xFF1B3A57);
-  static const _activeColor = Colors.white;
-  static const _inactiveColor = Color(0x80FFFFFF);
+  static const _inactiveColor = Color(0x70FFFFFF);
+
+  // Pill diameter that floats above the bar
+  static const double _pillSize = 50.0;
+  // How much the pill extends above the bar top edge
+  static const double _pillOverlap = 14.0;
+  // Bar body height (below pill overlap zone)
+  static const double _barHeight = 62.0;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: _navy,
-        boxShadow: [
-          BoxShadow(color: Color(0x30000000), blurRadius: 20, offset: Offset(0, -4)),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            children: List.generate(_items.length, (i) {
-              final item = _items[i];
-              final selected = i == currentIndex;
-              return Expanded(
-                child: InkWell(
-                  onTap: () => onTap(i),
-                  splashColor: Colors.white10,
-                  highlightColor: Colors.transparent,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: selected ? Colors.white.withValues(alpha: 0.15) : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          child: Icon(
-                            selected ? item.iconSelected : item.icon,
-                            key: ValueKey(selected),
-                            size: 22,
-                            color: selected ? _activeColor : _inactiveColor,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        AnimatedDefaultTextStyle(
-                          duration: const Duration(milliseconds: 200),
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                            color: selected ? _activeColor : _inactiveColor,
-                            fontFamily: 'Inter',
-                          ),
-                          child: Text(item.label),
-                        ),
-                      ],
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
+    return SizedBox(
+      height: _barHeight + _pillOverlap + bottomPadding,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // ── Bar background ──
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: _barHeight + bottomPadding,
+            child: DecoratedBox(
+              decoration: const BoxDecoration(
+                color: _navy,
+                boxShadow: [
+                  BoxShadow(color: Color(0x28000000), blurRadius: 20, offset: Offset(0, -4)),
+                ],
+              ),
+            ),
+          ),
+
+          // ── Tab items ──
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: bottomPadding,
+            height: _barHeight,
+            child: Row(
+              children: List.generate(_items.length, (i) {
+                final item = _items[i];
+                final selected = i == currentIndex;
+
+                return Expanded(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => onTap(i),
+                    child: SizedBox(
+                      height: _barHeight,
+                      child: selected
+                          ? _ActiveTabItem(item: item, pillSize: _pillSize, pillOverlap: _pillOverlap, barHeight: _barHeight)
+                          : _InactiveTabItem(item: item, inactiveColor: _inactiveColor),
                     ),
                   ),
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActiveTabItem extends StatelessWidget {
+  final _NavItem item;
+  final double pillSize;
+  final double pillOverlap;
+  final double barHeight;
+
+  const _ActiveTabItem({
+    required this.item,
+    required this.pillSize,
+    required this.pillOverlap,
+    required this.barHeight,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.topCenter,
+      children: [
+        // ── Floating pill (overflows above bar) ──
+        Positioned(
+          top: -(pillOverlap),
+          child: Container(
+            width: pillSize,
+            height: pillSize,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x22000000),
+                  blurRadius: 12,
+                  offset: Offset(0, 4),
                 ),
-              );
-            }),
+              ],
+            ),
+            child: Icon(
+              item.iconSelected,
+              size: 24,
+              color: const Color(0xFF1B3A57),
+            ),
           ),
         ),
-      ),
+        // ── Label below the pill area ──
+        Positioned(
+          bottom: 8,
+          left: 0,
+          right: 0,
+          child: Text(
+            item.label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              fontFamily: 'Inter',
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InactiveTabItem extends StatelessWidget {
+  final _NavItem item;
+  final Color inactiveColor;
+
+  const _InactiveTabItem({required this.item, required this.inactiveColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(item.icon, size: 22, color: inactiveColor),
+        const SizedBox(height: 3),
+        Text(
+          item.label,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w400,
+            color: inactiveColor,
+            fontFamily: 'Inter',
+          ),
+        ),
+      ],
     );
   }
 }

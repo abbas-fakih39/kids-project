@@ -1,12 +1,23 @@
 import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
 import { PaymentMethod, PaymentStatus, UserRole, BookingStatus } from '@prisma/client';
 
+const STATUS_MESSAGES: Partial<Record<BookingStatus, string>> = {
+  [BookingStatus.confirmee]:  'Votre réservation a été confirmée.',
+  [BookingStatus.en_cours]:   'Votre location est maintenant en cours.',
+  [BookingStatus.terminee]:   'Votre location est terminée. Merci !',
+  [BookingStatus.annulee]:    'Votre réservation a été annulée.',
+};
+
 @Injectable()
 export class BookingsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notifs: NotificationsService,
+  ) {}
 
   async create(userId: number, dto: CreateBookingDto) {
     const startDate = new Date(dto.booking_start_date);
@@ -183,9 +194,23 @@ export class BookingsService {
   }
 
   async updateStatus(id: number, dto: UpdateBookingStatusDto) {
-    return this.prisma.booking.update({
+    const booking = await this.prisma.booking.update({
       where: { booking_id: id },
       data: { booking_status: dto.status },
+      include: { user: { select: { user_push_token: true } } },
     });
+
+    const token = booking.user?.user_push_token;
+    const message = STATUS_MESSAGES[dto.status];
+    if (token && message) {
+      await this.notifs.sendToToken(
+        token,
+        'Kits & Kids',
+        message,
+        { booking_id: String(id) },
+      );
+    }
+
+    return booking;
   }
 }

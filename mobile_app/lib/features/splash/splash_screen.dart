@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/storage/secure_storage.dart';
-import '../../core/widgets/app_logo.dart';
 import '../auth/providers/auth_provider.dart';
 
 // Splash animation sequence (matching maquette frames):
@@ -111,8 +110,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Logo icon (white scheme on black bg)
-                    const AppLogo(size: 52, whiteScheme: true),
+                    // Logo icon
+                    Image.asset('assets/images/logo.png', width: 52, height: 52),
                     const SizedBox(width: 10),
                     // Text slides in after bounce
                     FadeTransition(

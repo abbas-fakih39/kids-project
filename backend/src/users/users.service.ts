@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateNotifPrefsDto } from './dto/update-notif-prefs.dto';
 import * as bcrypt from 'bcrypt';
 import { Prisma } from '@prisma/client';
 
@@ -37,6 +38,35 @@ export class UsersService {
     });
     if (!user) throw new NotFoundException('User not found');
     return user;
+  }
+
+  async getPreferences(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { user_id: userId },
+      select: {
+        user_notif_push: true,
+        user_notif_promo: true,
+        user_notif_transactional: true,
+      },
+    });
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
+  async updatePreferences(userId: number, dto: UpdateNotifPrefsDto) {
+    return this.prisma.user.update({
+      where: { user_id: userId },
+      data: {
+        ...(dto.push !== undefined && { user_notif_push: dto.push }),
+        ...(dto.promo !== undefined && { user_notif_promo: dto.promo }),
+        ...(dto.transactional !== undefined && { user_notif_transactional: dto.transactional }),
+      },
+      select: {
+        user_notif_push: true,
+        user_notif_promo: true,
+        user_notif_transactional: true,
+      },
+    });
   }
 
   async update(id: number, dto: UpdateUserDto) {
@@ -80,6 +110,14 @@ export class UsersService {
       data: { user_password: newHash, user_refresh_token: null },
     });
     return { message: 'Mot de passe mis à jour' };
+  }
+
+  async savePushToken(userId: number, token: string) {
+    await this.prisma.user.update({
+      where: { user_id: userId },
+      data: { user_push_token: token },
+    });
+    return { success: true };
   }
 
   async remove(id: number) {
