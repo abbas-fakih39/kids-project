@@ -7,8 +7,10 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Install all deps (postinstall automatically runs `prisma generate`)
-RUN npm ci
+# Install deps without running postinstall (prisma generate needs the schema
+# to already be in place and doesn't need DATABASE_URL at build time, but
+# the postinstall may fail if env isn't set — so we run it explicitly below)
+RUN npm ci --ignore-scripts && npx prisma generate
 
 # Copy source and compile
 COPY . .
