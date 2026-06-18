@@ -5,11 +5,12 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY prisma ./prisma/
+COPY prisma.config.ts ./
 
 RUN npm ci --ignore-scripts
 
-# Prisma v7 validates DATABASE_URL even during generate; supply a placeholder.
-# The real URL is injected at runtime via environment variables.
+# Prisma v7 reads DATABASE_URL from prisma.config.ts at generate time.
+# Supply a placeholder so the validator passes; real URL is injected at runtime.
 ARG DATABASE_URL=postgresql://build:build@localhost:5432/build
 ENV DATABASE_URL=${DATABASE_URL}
 
@@ -27,6 +28,7 @@ ENV NODE_ENV=production
 
 COPY package*.json ./
 COPY prisma ./prisma/
+COPY prisma.config.ts ./
 
 RUN npm ci --omit=dev --ignore-scripts && \
     npm install prisma --no-save --ignore-scripts
