@@ -10,6 +10,7 @@ import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
 import 'features/auth/screens/register_success_screen.dart';
 import 'features/main/main_shell.dart';
+import 'features/catalog/screens/catalog_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,6 +47,7 @@ class KitsAndKidsApp extends StatelessWidget {
         '/register':          (_) => const RegisterScreen(),
         '/register-success':  (_) => const RegisterSuccessScreen(),
         '/home':              (_) => const MainShell(),
+        '/catalog':           (_) => const CatalogScreen(),
       },
     );
   }

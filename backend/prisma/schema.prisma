@@ -47,6 +47,17 @@ enum PaymentStatus {
 
 // MODELS
 
+model Category {
+  cat_id    Int     @id @default(autoincrement())
+  cat_name  String  @db.VarChar(100)
+  cat_slug  String  @unique @db.VarChar(100)
+  cat_order Int     @default(0)
+
+  products  Product[]
+
+  @@map("categories")
+}
+
 model User {
   user_id            Int       @id @default(autoincrement())
   user_nom           String    @db.VarChar(100)
@@ -76,6 +87,8 @@ model Product {
   products_name             String        @db.VarChar(255)
   products_description      String?       @db.Text
   products_category         String        @db.VarChar(100)
+  products_image_url        String?       @db.VarChar(500)
+  products_category_id      Int?
   products_price_per_day    Decimal       @db.Decimal(10, 2)
   products_stock            Int           @default(0)
   products_safety_standards String?       @db.VarChar(255)
@@ -83,10 +96,11 @@ model Product {
   products_created_at       DateTime      @default(now()) @db.Date
   products_updated_at       DateTime?     @updatedAt @db.Date
 
-  images         ProductImage[]
+  category        Category?       @relation(fields: [products_category_id], references: [cat_id], onDelete: SetNull)
+  images          ProductImage[]
   bookingProducts BookingProduct[]
-  reviews        Review[]
-  cartItems      CartItem[]
+  reviews         Review[]
+  cartItems       CartItem[]
 
   @@index([products_category, products_status])
   @@map("products")

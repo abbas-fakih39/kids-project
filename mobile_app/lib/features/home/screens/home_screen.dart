@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../search/screens/search_filter_screen.dart';
 import '../../search/screens/search_screen.dart';
+import '../../catalog/screens/catalog_screen.dart';
 
 // ─── Tokens (miroir du design system CLAUDE.md) ───────────────
 const _navy      = Color(0xFF1B3A57);
@@ -121,6 +122,8 @@ class HomeScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 28),
                 _buildCategories(context),
+                const SizedBox(height: 20),
+                _buildCatalogCta(context),
                 const SizedBox(height: 36),
                 _buildHowItWorks(),
                 const SizedBox(height: 36),
@@ -310,6 +313,68 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  // ── Catalogue CTA ─────────────────────────────────────────
+  Widget _buildCatalogCta(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: GestureDetector(
+        onTap: () => Navigator.of(context, rootNavigator: true).push(
+          MaterialPageRoute(builder: (_) => const CatalogScreen()),
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF1B3A57), Color(0xFF2D5A8B)],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.grid_view_rounded, color: Colors.white, size: 22),
+              ),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Voir tout le catalogue',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      '21 équipements · 5 catégories',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white70, size: 14),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

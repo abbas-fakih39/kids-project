@@ -14,6 +14,7 @@ import { CartModule } from './cart/cart.module';
 import { SupportModule } from './support/support.module';
 import { AdminModule } from './admin/admin.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { CatalogModule } from './catalog/catalog.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     SupportModule,
     AdminModule,
     NotificationsModule,
+    CatalogModule,
   ],
   controllers: [AppController],
   providers: [AppService],

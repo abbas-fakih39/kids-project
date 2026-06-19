@@ -18,6 +18,9 @@ class ApiConstants {
   // Products
   static const String products = '/products';
 
+  // Catalog (products grouped by category)
+  static const String catalog = '/catalog';
+
   // Cart
   static const String cart = '/cart';
   static const String cartItems = '/cart/items';
