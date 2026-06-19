@@ -52,8 +52,7 @@ class ProfileScreen extends StatelessWidget {
                 _MenuItem(
                   icon: Icons.admin_panel_settings_rounded,
                   label: 'Espace Admin',
-                  onTap: () => Navigator.push(
-                    context,
+                  onTap: () => Navigator.of(context, rootNavigator: true).push(
                     MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
                   ),
                 ),

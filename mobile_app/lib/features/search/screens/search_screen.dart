@@ -131,8 +131,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<void> _openFilter() async {
-    final filters = await Navigator.push<Map<String, dynamic>>(
-      context,
+    final filters = await Navigator.of(context, rootNavigator: true).push<Map<String, dynamic>>(
       MaterialPageRoute(fullscreenDialog: true, builder: (_) => const SearchFilterScreen()),
     );
     if (filters != null && mounted) {
@@ -457,7 +456,7 @@ class _SearchScreenState extends State<SearchScreen> {
           crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 0.70,
+          childAspectRatio: 0.64,
         ),
         itemCount: _products.length,
         itemBuilder: (ctx, i) => _ProductCard(product: _products[i]),
@@ -493,8 +492,7 @@ class _ProductCard extends StatelessWidget {
     final reviewCount = (product['review_count'] as int?)    ?? 0;
 
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
+      onTap: () => Navigator.of(context, rootNavigator: true).push(
         MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product)),
       ),
       child: Container(
@@ -580,7 +578,7 @@ class _ProductCard extends StatelessWidget {
             Expanded(
               flex: 42,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -617,7 +615,7 @@ class _ProductCard extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 4),
                         // Price + reserve
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
