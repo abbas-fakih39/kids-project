@@ -45,37 +45,54 @@ async function main() {
   });
 
   console.log('Création des produits...');
-  // 1. Poussette (Stock normal, beaucoup de reviews, avec images)
+  // 1. Poussette
   const p1 = await prisma.product.create({
     data: {
-      products_name: 'Poussette Yoyo 2 Babyzen', products_description: 'Ultra compacte, idéale voyage en cabine avion.', products_category: 'Poussettes', products_price_per_day: 15.00, products_stock: 5, products_safety_standards: 'EN 1888',
-      images: { create: [{ image_url: 'https://images.unsplash.com/photo-1591129938363-f24cb7340dcd?q=80&w=600', image_order: 0 }] },
+      products_name: 'Poussette Yoyo 2 Babyzen', products_description: 'Ultra compacte, pliage en 1 seconde, idéale voyage en cabine avion. Légère et maniable en ville.', products_category: 'Poussettes', products_price_per_day: 15.00, products_stock: 5, products_safety_standards: 'EN 1888',
+      images: { create: [
+        { image_url: 'https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=800&q=80', image_order: 0 },
+        { image_url: 'https://images.unsplash.com/photo-1476703993599-0035a21b17a9?w=800&q=80', image_order: 1 },
+      ]},
     },
   });
-  // 2. Lit Parapluie (CAS SPECIAL: Stock 0 - rupture, avec image)
+  // 2. Lit Parapluie (stock 0)
   const p2 = await prisma.product.create({
     data: {
-      products_name: 'Lit Parapluie BabyBjörn Light', products_description: 'Très confortable et léger à transporter.', products_category: 'Sommeil', products_price_per_day: 10.00, products_stock: 0,
-      images: { create: [{ image_url: 'https://images.unsplash.com/photo-1544126592-807ade215a0b?q=80&w=600', image_order: 0 }] },
+      products_name: 'Lit Parapluie BabyBjörn Light', products_description: 'Très confortable et léger à transporter. Montage rapide sans outils, matelas inclus.', products_category: 'Lits', products_price_per_day: 10.00, products_stock: 0,
+      images: { create: [
+        { image_url: 'https://images.unsplash.com/photo-1544126592-807ade215a0b?w=800&q=80', image_order: 0 },
+        { image_url: 'https://images.unsplash.com/photo-1519689373023-dd07c7988603?w=800&q=80', image_order: 1 },
+      ]},
     },
   });
-  // 3. Chaise Haute (Stock faible, sans reviews, sans image)
+  // 3. Chaise Haute (stock faible)
   const p3 = await prisma.product.create({
     data: {
-      products_name: 'Chaise Haute Stokke Tripp Trapp', products_description: 'Évolutive et ergonomique, avec son baby set.', products_category: 'Repas', products_price_per_day: 8.00, products_stock: 1,
+      products_name: 'Chaise Haute Stokke Tripp Trapp', products_description: 'Évolutive et ergonomique, accompagne l\'enfant de 6 mois à l\'âge adulte. Baby set inclus.', products_category: 'Repas', products_price_per_day: 8.00, products_stock: 1,
+      images: { create: [
+        { image_url: 'https://images.unsplash.com/photo-1566004100631-35d015d6a491?w=800&q=80', image_order: 0 },
+        { image_url: 'https://images.unsplash.com/photo-1492725764893-90b379c2b6e7?w=800&q=80', image_order: 1 },
+      ]},
     },
   });
-  // 4. Siège Auto (Beaucoup de stock, image)
+  // 4. Siège Auto
   const p4 = await prisma.product.create({
     data: {
-      products_name: 'Siège Auto Cybex Pallas G', products_description: 'Sécurité maximale avec bouclier d\'impact.', products_category: 'Voyage', products_price_per_day: 12.00, products_stock: 10,
-      images: { create: [{ image_url: 'https://images.unsplash.com/photo-1512497676759-4bf5d39bb3e3?q=80&w=600', image_order: 0 }] }
+      products_name: 'Siège Auto Cybex Pallas G', products_description: 'Sécurité maximale avec bouclier d\'impact breveté. Convient de 3 mois à 12 ans. Isofix inclus.', products_category: 'Voyage', products_price_per_day: 12.00, products_stock: 10,
+      images: { create: [
+        { image_url: 'https://images.unsplash.com/photo-1549317336-206569e8475c?w=800&q=80', image_order: 0 },
+        { image_url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80', image_order: 1 },
+      ]},
     },
   });
-  // 5. Chauffe-biberon (Catégorie différente, petit prix, sans image, sans avis)
+  // 5. Chauffe-biberon
   const p5 = await prisma.product.create({
     data: {
-      products_name: 'Chauffe-biberon Avent', products_description: 'Rapide et universel pour petits pots.', products_category: 'Repas', products_price_per_day: 3.00, products_stock: 4,
+      products_name: 'Chauffe-biberon Philips Avent', products_description: 'Chauffe rapidement et uniformément biberons et petits pots. Compatible toutes marques. Sans BPA.', products_category: 'Repas', products_price_per_day: 3.00, products_stock: 4,
+      images: { create: [
+        { image_url: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=80', image_order: 0 },
+        { image_url: 'https://images.unsplash.com/photo-1515488042361-ee00e01ded1e?w=800&q=80', image_order: 1 },
+      ]},
     },
   });
 
