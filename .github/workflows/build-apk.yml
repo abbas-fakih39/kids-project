@@ -1,0 +1,83 @@
+name: Build & Release APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # Allow manual trigger from GitHub UI
+
+permissions:
+  contents: write # Required to create releases and upload assets
+
+jobs:
+  build-apk:
+    name: Build Release APK
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: mobile_app
+
+    steps:
+      # ── Checkout ──────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── Java 17 (required by AGP 8.11.1 & Kotlin 2.2.20) ───
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # ── Flutter SDK ──────────────────────────────────────────
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true # Cache Flutter SDK between runs
+
+      # ── Override Gradle JVM args for CI ──────────────────────
+      # The project's gradle.properties requests -Xmx8G which
+      # exceeds GitHub Actions runner memory (~7GB).
+      - name: Adjust Gradle memory for CI
+        run: |
+          cat > android/gradle.properties << 'EOF'
+          org.gradle.jvmargs=-Xmx4G -XX:MaxMetaspaceSize=2G -XX:+HeapDumpOnOutOfMemoryError
+          android.useAndroidX=true
+          EOF
+
+      # ── Dependencies ─────────────────────────────────────────
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      # ── Build ────────────────────────────────────────────────
+      - name: Build release APK
+        run: flutter build apk --release
+
+      # ── Rename APK ───────────────────────────────────────────
+      - name: Rename APK for release
+        run: |
+          mkdir -p release
+          cp build/app/outputs/flutter-apk/app-release.apk \
+             release/kits-and-kids-build-${{ github.run_number }}.apk
+
+      # ── Create GitHub Release ────────────────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: "Kits & Kids — Build #${{ github.run_number }}"
+          body: |
+            ### 📱 Automated APK Build
+
+            **Commit:** `${{ github.sha }}`
+            **Branch:** `${{ github.ref_name }}`
+            **Date:** ${{ github.event.head_commit.timestamp }}
+
+            ---
+            Download the APK below and install it on your Android device.
+            _(You may need to enable "Install from unknown sources" in your phone settings.)_
+          files: mobile_app/release/kits-and-kids-build-${{ github.run_number }}.apk
+          draft: false
+          prerelease: false
+          make_latest: true
