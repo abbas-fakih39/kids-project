@@ -10,22 +10,21 @@ class _OBPage {
   const _OBPage(this.title, this.description, this.imageUrl);
 }
 
-// 3 onboarding slides (replace image URLs with your own assets if preferred)
 const _pages = [
   _OBPage(
     'Choisissez',
     'Sélectionnez votre matériel\net vos dates de location sur\nl\'application.',
-    'https://images.unsplash.com/photo-1591129938363-f24cb7340dcd?w=1080&q=80',
+    'assets/images/onboarding_1.png',
   ),
   _OBPage(
     'Réservez',
     'Retrait en agence ou livraison à\ndomicile, gare, aéroport\npartout en France.',
-    'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=1080&q=80',
+    'assets/images/onboarding_2.png',
   ),
   _OBPage(
     'Profitez',
     'Paiement sécurisé. Le matériel\nvous attend, propre et prêt à\nl\'emploi.',
-    'https://images.unsplash.com/photo-1544126592-807ade215a0b?w=1080&q=80',
+    'assets/images/onboarding_3.png',
   ),
 ];
 
@@ -185,12 +184,10 @@ class _OnboardingPageWidget extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         // Background photo
-        Image.network(
+        Image.asset(
           page.imageUrl,
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) => Container(color: const Color(0xFF1B3A57)),
-          loadingBuilder: (_, child, progress) =>
-              progress == null ? child : Container(color: Colors.black),
         ),
 
         // Dark gradient overlay — heavier at bottom (where text lives)
