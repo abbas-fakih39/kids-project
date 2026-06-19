@@ -238,46 +238,64 @@ async function main() {
 
   // Convenience aliases used in bookings
   const p1  = createdProducts['Poussette Babyzen Yoyo 2'];
+  const p2  = createdProducts['Poussette Bugaboo Butterfly'];
+  const p5  = createdProducts['Poussette Maxi-Cosi Lara²'];
+  const p6  = createdProducts['Lit Parapluie BabyBjörn Light'];
+  const p8  = createdProducts['Lit Bébé Stokke Sleepi Mini'];
   const p10 = createdProducts['Chaise Haute Stokke Tripp Trapp'];
+  const p11 = createdProducts['Chaise Haute Chicco Polly Magic Relax'];
   const p12 = createdProducts['Chauffe-biberon Philips Avent'];
   const p14 = createdProducts['Siège Auto Cybex Pallas G'];
+  const p15 = createdProducts['Siège Auto Maxi-Cosi Pebble 360 Pro'];
+  const p16 = createdProducts['Siège Auto Joie i-Spin Safe'];
+  const p17 = createdProducts['Siège Auto BeSafe iZi Turn M i-Size'];
+  const p18 = createdProducts["Tapis d'Éveil Fisher-Price Deluxe"];
+  const p19 = createdProducts['Balancelle BabyBjörn Bouncer Bliss'];
+  const p21 = createdProducts['Mobile Musical Tiny Love Meadow Days'];
 
   console.log('Création des réservations et des avis...');
 
-  const b1 = await prisma.booking.create({
-    data: {
-      booking_user_id:        client1.user_id,
-      booking_start_date:     new Date('2026-02-01T10:00:00Z'),
-      booking_end_date:       new Date('2026-02-05T10:00:00Z'),
-      booking_total_amount:   5 * 15.00 + 5 * 12.00,
-      booking_status:         BookingStatus.terminee,
-      booking_delivery_method: DeliveryMethod.retrait_en_magasin,
-      products: {
-        create: [
-          { bp_product_id: p1.products_id,  bp_quantity: 1, bp_price_snapshot: 15.00 },
-          { bp_product_id: p14.products_id, bp_quantity: 1, bp_price_snapshot: 12.00 },
-        ],
+  // Helper : crée un booking terminé + 1 review (1 review par booking max)
+  async function mkBooking(
+    user: typeof client1,
+    start: string, end: string,
+    items: Array<{ p: any; price: number }>,
+    reviewProductId: number | null,
+    reviewUserId: number,
+    reviewRating: number,
+    reviewComment: string,
+    delivery: DeliveryMethod = DeliveryMethod.retrait_en_magasin,
+    address?: { street: string; city: string; zip: string },
+  ) {
+    const days = (new Date(end).getTime() - new Date(start).getTime()) / 86_400_000;
+    const amount = items.reduce((s, i) => s + days * i.price, 0);
+    const bk = await prisma.booking.create({
+      data: {
+        booking_user_id:         user.user_id,
+        booking_start_date:      new Date(start),
+        booking_end_date:        new Date(end),
+        booking_total_amount:    amount,
+        booking_status:          BookingStatus.terminee,
+        booking_delivery_method: delivery,
+        ...(address ? { booking_delivery_street: address.street, booking_delivery_city: address.city, booking_delivery_zip: address.zip } : {}),
+        products: { create: items.map(i => ({ bp_product_id: i.p.products_id, bp_quantity: 1, bp_price_snapshot: i.price })) },
+        payment:  { create: { payments_amount: amount, payments_method: PaymentMethod.carte_bancaire, payments_status: PaymentStatus.valide } },
       },
-      payment: {
-        create: {
-          payments_amount: 135.00,
-          payments_method: PaymentMethod.carte_bancaire,
-          payments_status: PaymentStatus.valide,
-        },
-      },
-    },
-  });
+    });
+    if (reviewProductId) {
+      await prisma.review.create({ data: { review_booking_id: bk.booking_id, review_product_id: reviewProductId, review_user_id: reviewUserId, review_rating: reviewRating, review_comment: reviewComment } });
+    }
+    return bk;
+  }
 
-  await prisma.review.create({
-    data: {
-      review_booking_id:  b1.booking_id,
-      review_product_id:  p1.products_id,
-      review_user_id:     client1.user_id,
-      review_rating:      5,
-      review_comment:     'Parfaite pour notre séjour à Paris ! Très légère et pratique.',
-    },
-  });
+  // ── B1 : client1, terminée — Babyzen + Cybex → review Babyzen ★5
+  const b1 = await mkBooking(client1, '2026-02-01', '2026-02-05',
+    [{ p: p1, price: 15 }, { p: p14, price: 12 }],
+    p1.products_id, client1.user_id, 5, 'Parfaite pour notre séjour à Paris ! Très légère et pratique.',
+  );
+  void b1;
 
+  // ── B2 : client2, en cours ─────────────────────────────────
   await prisma.booking.create({
     data: {
       booking_user_id:         client2.user_id,
@@ -289,19 +307,12 @@ async function main() {
       booking_delivery_street: '15 rue du Louvre',
       booking_delivery_city:   'Paris',
       booking_delivery_zip:    '75001',
-      products: {
-        create: [{ bp_product_id: p10.products_id, bp_quantity: 1, bp_price_snapshot: 8.00 }],
-      },
-      payment: {
-        create: {
-          payments_amount: 88.00,
-          payments_method: PaymentMethod.paypal,
-          payments_status: PaymentStatus.valide,
-        },
-      },
+      products: { create: [{ bp_product_id: p10.products_id, bp_quantity: 1, bp_price_snapshot: 8.00 }] },
+      payment: { create: { payments_amount: 88.00, payments_method: PaymentMethod.paypal, payments_status: PaymentStatus.valide } },
     },
   });
 
+  // ── B3 : client1, annulée ──────────────────────────────────
   await prisma.booking.create({
     data: {
       booking_user_id:         client1.user_id,
@@ -310,11 +321,30 @@ async function main() {
       booking_total_amount:    2 * 3.00,
       booking_status:          BookingStatus.annulee,
       booking_delivery_method: DeliveryMethod.retrait_en_magasin,
-      products: {
-        create: [{ bp_product_id: p12.products_id, bp_quantity: 1, bp_price_snapshot: 3.00 }],
-      },
+      products: { create: [{ bp_product_id: p12.products_id, bp_quantity: 1, bp_price_snapshot: 3.00 }] },
     },
   });
+
+  // Une review par booking — 1 produit par booking pour les reviews
+  // Produits avec 2 reviews : p1 (Babyzen), p10 (Tripp Trapp), p18 (Fisher-Price)
+  // Produits avec 1 review  : p2, p5, p6, p8, p11, p14, p15, p16, p17, p19, p21
+  // Produits avec 0 review  : p3, p4, p7, p9, p12, p13, p20
+  await mkBooking(client2, '2026-01-08', '2026-01-12', [{ p: p1,  price: 15 }], p1.products_id,  client2.user_id, 4, 'Excellent rapport qualité-prix pour voyager léger. Pliage ultra rapide !');
+  await mkBooking(client2, '2026-01-10', '2026-01-15', [{ p: p14, price: 12 }], p14.products_id, client2.user_id, 4, 'Très bon siège, facile à installer en Isofix. Notre fils se sent en sécurité.');
+  await mkBooking(client1, '2026-01-12', '2026-01-16', [{ p: p2,  price: 18 }], p2.products_id,  client1.user_id, 4, 'Légère et maniable, parfaite pour nos vacances en ville !');
+  await mkBooking(client2, '2026-01-15', '2026-01-20', [{ p: p5,  price: 12 }], p5.products_id,  client2.user_id, 5, 'Ultra légère, elle tient dans le bagage cabine. Indispensable pour voyager avec bébé !');
+  await mkBooking(client1, '2026-01-18', '2026-01-22', [{ p: p8,  price: 14 }], p8.products_id,  client1.user_id, 5, 'Design magnifique et bébé dormait à merveille. Matériaux de qualité premium.');
+  await mkBooking(client2, '2026-01-20', '2026-01-27', [{ p: p10, price: 8  }], p10.products_id, client2.user_id, 5, 'Magnifique chaise, bébé s\'y installe à merveille. Qualité irréprochable !');
+  await mkBooking(client1, '2026-01-22', '2026-01-29', [{ p: p10, price: 8  }], p10.products_id, client1.user_id, 5, 'Design intemporel, notre fils l\'utilisera encore des années. Très stable et solide.');
+  await mkBooking(client2, '2026-02-01', '2026-02-06', [{ p: p11, price: 7  }], p11.products_id, client2.user_id, 4, 'Fonctionnelle et confortable, les repas deviennent plus simples !');
+  await mkBooking(client1, '2026-02-05', '2026-02-12', [{ p: p15, price: 14 }], p15.products_id, client1.user_id, 5, 'Rotation 360° géniale, installation et sortie de bébé super faciles !');
+  await mkBooking(client2, '2026-02-08', '2026-02-14', [{ p: p16, price: 10 }], p16.products_id, client2.user_id, 5, 'Rotation 360° et protection anti-recul intégrée — on se sent vraiment en sécurité !');
+  await mkBooking(client1, '2026-02-10', '2026-02-17', [{ p: p17, price: 16 }], p17.products_id, client1.user_id, 4, 'Siège de qualité premium, notre bébé est bien protégé. Un peu lourd mais ça en vaut la peine.', DeliveryMethod.livraison, { street: '3 rue de la République', city: 'Bordeaux', zip: '33000' });
+  await mkBooking(client2, '2026-02-15', '2026-02-20', [{ p: p18, price: 4  }], p18.products_id, client2.user_id, 5, 'Notre bébé adore les lumières et la musique ! L\'arche musicale est très bien conçue.');
+  await mkBooking(client1, '2026-03-15', '2026-03-18', [{ p: p18, price: 4  }], p18.products_id, client1.user_id, 4, 'Très bon tapis pour l\'éveil. Les couleurs et sons stimulent bien bébé dès les premiers mois.');
+  await mkBooking(client1, '2026-03-01', '2026-03-05', [{ p: p19, price: 8  }], p19.products_id, client1.user_id, 5, 'Indispensable ! Mon bébé s\'endort dessus en quelques minutes. Ultra léger et portable.');
+  await mkBooking(client2, '2026-03-05', '2026-03-09', [{ p: p21, price: 3  }], p21.products_id, client2.user_id, 4, 'Très beau mobile, musiques douces et apaisantes. Bébé reste fasciné pendant de longues minutes.');
+  await mkBooking(client2, '2026-03-08', '2026-03-13', [{ p: p6,  price: 10 }], p6.products_id,  client2.user_id, 4, 'Montage et démontage en 2 minutes, bébé dort très bien dedans. Très léger à transporter.');
 
   console.log('Génération de la data fictive terminée avec succès !');
 }

@@ -25,32 +25,32 @@ class _Category {
 const _categories = [
   _Category(
     'Repas &\nAlimentation',
-    'https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=600&q=80',
+    'https://www.stokke.com/dw/image/v2/AAQF_PRD/on/demandware.static/-/Sites-stokke-master-catalog/default/dw660bb2ae/images/inriverimages/mainview/TrippTrapp_Natural_2-8_SP.jpg',
     searchValue: 'Repas',
   ),
   _Category(
     'Poussettes &\nChariots',
-    'https://images.unsplash.com/photo-1591129938363-f24cb7340dcd?w=600&q=80',
+    'https://www.bugaboo.com/dw/image/v2/BDLP_PRD/on/demandware.static/-/Sites-bugaboo-master/default/dw25b5e3a4/images/PV007669/Bugaboo-Butterfly-2-travel-stroller-black-base-heritage-black-fabrics-heritage-black-sun-canopy-x-PV007669-01.png',
     searchValue: 'Poussettes',
   ),
   _Category(
     'Lits &\nSommeil',
-    'https://images.unsplash.com/photo-1544126592-807ade215a0b?w=600&q=80',
+    'https://www.stokke.com/dw/image/v2/AAQF_PRD/on/demandware.static/-/Sites-stokke-master-catalog/default/dwf59fd539/images/inriverimages/mainview/Sleepi-Mini_Natural_5067_eCom.jpg',
     searchValue: 'Lits',
   ),
   _Category(
     'Sièges Auto',
-    'https://images.unsplash.com/photo-1512497676759-4bf5d39bb3e3?w=600&q=80',
+    'https://images.maxi-cosi.com/dorel-public-storage-prod/catalog/product/cache/74c1057f7991b4edb2bc7bdaa94de933/8/0/8052470301_2024_maxicosi_carseat_babycarseat_pebble360pro2_brown_twillictruffle_3qrtleft.png',
     searchValue: 'Sièges auto',
   ),
   _Category(
     'Jouets & Jeux',
-    'https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=600&q=80',
+    'https://a.storyblok.com/f/187315/1667x2500/f252633f18/us-006033-bouncer-bliss-blue-woven-melange-pp-babybjorn-01.png',
     searchValue: 'Jouets',
   ),
   _Category(
     'Packs',
-    'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80',
+    'https://www.stokke.com/on/demandware.static/-/Library-Sites-StokkeSharedLibrary/default/dw00996f67/cms_assets/yoyo6m_jpg__size-xl.jpg',
   ),
 ];
 

@@ -82,49 +82,63 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── Image Header ──
-            Container(
+            SizedBox(
               height: 380,
               width: double.infinity,
-              color: const Color(0xFFDDE9FE),
-              child: SafeArea(
-                bottom: false,
-                child: Stack(
-                  children: [
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(32.0),
-                        child: (widget.product['image'] as String? ?? '').isNotEmpty
-                            ? CachedNetworkImage(
-                                imageUrl: widget.product['image'] as String,
-                                fit: BoxFit.contain,
-                                placeholder: (_, __) => const CircularProgressIndicator(strokeWidth: 1.5),
-                                errorWidget: (_, __, ___) =>
-                                    const Icon(Icons.broken_image, size: 64, color: Colors.black26),
-                              )
-                            : const Icon(Icons.image_not_supported, size: 64, color: Colors.black26),
-                      ),
-                    ),
-                    Positioned(
-                      top: 16,
-                      right: 20,
-                      child: GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(color: Color(0x15000000), blurRadius: 10, offset: Offset(0, 2)),
-                            ],
+              child: Stack(
+                children: [
+                  // Full-bleed image
+                  Positioned.fill(
+                    child: (widget.product['image'] as String? ?? '').isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: widget.product['image'] as String,
+                            fit: BoxFit.cover,
+                            placeholder: (_, __) => Container(
+                              color: const Color(0xFFDDE9FE),
+                              child: const Center(
+                                child: CircularProgressIndicator(strokeWidth: 1.5, color: Color(0xFF3C82F5)),
+                              ),
+                            ),
+                            errorWidget: (_, __, ___) => Container(
+                              color: const Color(0xFFDDE9FE),
+                              child: const Center(
+                                child: Icon(Icons.broken_image, size: 64, color: Colors.black26),
+                              ),
+                            ),
+                          )
+                        : Container(
+                            color: const Color(0xFFDDE9FE),
+                            child: const Center(
+                              child: Icon(Icons.image_not_supported, size: 64, color: Colors.black26),
+                            ),
                           ),
-                          child: const Icon(Icons.close_rounded, color: Color(0xFF1B3A57), size: 20),
+                  ),
+                  // Close button — on top of image
+                  SafeArea(
+                    bottom: false,
+                    child: Align(
+                      alignment: Alignment.topRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 16, right: 20),
+                        child: GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(color: Color(0x15000000), blurRadius: 10, offset: Offset(0, 2)),
+                              ],
+                            ),
+                            child: const Icon(Icons.close_rounded, color: Color(0xFF1B3A57), size: 20),
+                          ),
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
 

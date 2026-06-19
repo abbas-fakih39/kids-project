@@ -44,10 +44,9 @@ class ProductCard extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                    child: Container(
+                    child: SizedBox(
                       height: 130,
                       width: double.infinity,
-                      color: _lightBlue,
                       child: _buildImage(),
                     ),
                   ),
@@ -139,16 +138,22 @@ class ProductCard extends StatelessWidget {
     }
     return CachedNetworkImage(
       imageUrl: url,
-      fit: BoxFit.contain,
-      placeholder: (_, __) => const Center(
-        child: SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(strokeWidth: 1.5, color: Color(0xFF3C82F5)),
+      fit: BoxFit.cover,
+      placeholder: (_, __) => Container(
+        color: _lightBlue,
+        child: const Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 1.5, color: Color(0xFF3C82F5)),
+          ),
         ),
       ),
-      errorWidget: (_, __, ___) => const Center(
-        child: Icon(Icons.broken_image_outlined, size: 36, color: Color(0xFFB0C4DE)),
+      errorWidget: (_, __, ___) => Container(
+        color: _lightBlue,
+        child: const Center(
+          child: Icon(Icons.broken_image_outlined, size: 36, color: Color(0xFFB0C4DE)),
+        ),
       ),
     );
   }
