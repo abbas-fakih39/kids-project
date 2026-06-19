@@ -1,12 +1,14 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
 import '../constants/api_constants.dart';
 import '../storage/secure_storage.dart';
 import '../navigation/app_navigator.dart';
+
+// dart:io is not available on web — conditionally import for cert pinning
+import 'dio_client_native.dart' if (dart.library.html) 'dio_client_web.dart'
+    as platform_config;
 
 class DioClient {
   static final Dio _dio = _createDio();
@@ -22,17 +24,8 @@ class DioClient {
     );
     dio.interceptors.add(_AuthInterceptor());
 
-    // Certificate pinning — only in release mode and when CERT_SHA256 is provided.
-    // Build with: --dart-define=CERT_SHA256=<server-cert-sha256-hex>
-    if (kReleaseMode) {
-      const certSha256 = String.fromEnvironment('CERT_SHA256', defaultValue: '');
-      if (certSha256.isNotEmpty) {
-        (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () =>
-            HttpClient()
-              ..badCertificateCallback = (cert, host, port) =>
-                  sha256.convert(cert.der).toString() == certSha256;
-      }
-    }
+    // Certificate pinning — only on native platforms, not on web
+    platform_config.configureCertPinning(dio);
 
     return dio;
   }

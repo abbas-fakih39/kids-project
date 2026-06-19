@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'core/theme/app_theme.dart';
@@ -14,11 +15,13 @@ import 'features/catalog/screens/catalog_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  // TODO: replace with your live key for production
-  Stripe.publishableKey = const String.fromEnvironment(
-    'STRIPE_PUBLISHABLE_KEY',
-    defaultValue: 'pk_test_placeholder',
-  );
+  // Stripe SDK uses dart:io Platform internally — skip on web
+  if (!kIsWeb) {
+    Stripe.publishableKey = const String.fromEnvironment(
+      'STRIPE_PUBLISHABLE_KEY',
+      defaultValue: 'pk_test_placeholder',
+    );
+  }
   runApp(
     MultiProvider(
       providers: [
