@@ -3,7 +3,7 @@ class ApiConstants {
   // Defaults to Android emulator address for local development.
   static const String baseUrl = String.fromEnvironment(
     'BASE_URL',
-    defaultValue: 'https://kids-project-1.onrender.com',
+    defaultValue: 'https://kitsandkids-api.onrender.com',
   );
 
   // Auth
